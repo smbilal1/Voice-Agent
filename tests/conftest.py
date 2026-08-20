@@ -54,6 +54,9 @@ class FakeSession:
     def commit(self) -> None:
         pass
 
+    def flush(self) -> None:
+        pass
+
     def refresh(self, _patient) -> None:
         pass
 

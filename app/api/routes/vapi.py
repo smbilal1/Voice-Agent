@@ -72,8 +72,7 @@ def execute_tool(name: str | None, arguments: dict[str, Any], session: Session) 
     if name == "create_patient":
         payload = PatientCreate.model_validate(arguments)
         patient = repository.create(session, payload.model_dump())
-        session.commit()
-        session.refresh(patient)
+        session.flush()
         logger.info("vapi_create_patient_payload=%s", payload.model_dump(mode="json"))
         return {"status": "created", "patient_id": str(patient.patient_id), "first_name": patient.first_name}
 
@@ -86,8 +85,7 @@ def execute_tool(name: str | None, arguments: dict[str, Any], session: Session) 
         if patient is None:
             return {"status": "not_found"}
         patient = repository.update(session, patient, values)
-        session.commit()
-        session.refresh(patient)
+        session.flush()
         return {"status": "updated", "patient_id": str(patient.patient_id), "first_name": patient.first_name}
 
     raise ValueError("Unsupported tool")
