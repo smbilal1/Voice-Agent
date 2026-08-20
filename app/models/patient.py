@@ -26,9 +26,10 @@ class Patient(Base):
         CheckConstraint("last_name ~ '^[A-Za-z]+([\\x27-][A-Za-z]+)*$'", name="ck_patients_last_name_format"),
         CheckConstraint("date_of_birth <= CURRENT_DATE", name="ck_patients_date_of_birth_not_future"),
         CheckConstraint("phone_number ~ '^[0-9]{10}$'", name="ck_patients_phone_number_format"),
-        CheckConstraint("char_length(city) BETWEEN 1 AND 100", name="ck_patients_city_length"),
-        CheckConstraint("state ~ '^[A-Z]{2}$'", name="ck_patients_state_format"),
-        CheckConstraint("zip_code ~ '^[0-9]{5}(-[0-9]{4})?$'", name="ck_patients_zip_code_format"),
+        # Optional field constraints (only apply when values are present)
+        CheckConstraint("city IS NULL OR char_length(city) BETWEEN 1 AND 100", name="ck_patients_city_length"),
+        CheckConstraint("state IS NULL OR state ~ '^[A-Z]{2}$'", name="ck_patients_state_format"),
+        CheckConstraint("zip_code IS NULL OR zip_code ~ '^[0-9]{5}(-[0-9]{4})?$'", name="ck_patients_zip_code_format"),
         CheckConstraint("emergency_contact_phone IS NULL OR emergency_contact_phone ~ '^[0-9]{10}$'", name="ck_patients_emergency_contact_phone_format"),
         CheckConstraint("insurance_member_id IS NULL OR insurance_member_id ~ '^[A-Za-z0-9]+$'", name="ck_patients_insurance_member_id_format"),
         Index("ix_patients_last_name", "last_name"),
@@ -36,6 +37,7 @@ class Patient(Base):
         Index("ix_patients_phone_number_active", "phone_number", postgresql_where="deleted_at IS NULL"),
     )
 
+    # Required fields (Phase 1: minimal voice collection)
     patient_id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     last_name: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -45,17 +47,21 @@ class Patient(Base):
         nullable=False,
     )
     phone_number: Mapped[str] = mapped_column(String(10), nullable=False)
+    
+    # Optional fields (nullable at database level)
     email: Mapped[str | None] = mapped_column(String(254))
-    address_line_1: Mapped[str] = mapped_column(String(200), nullable=False)
+    address_line_1: Mapped[str | None] = mapped_column(String(200))
     address_line_2: Mapped[str | None] = mapped_column(String(200))
-    city: Mapped[str] = mapped_column(String(100), nullable=False)
-    state: Mapped[str] = mapped_column(String(2), nullable=False)
-    zip_code: Mapped[str] = mapped_column(String(10), nullable=False)
+    city: Mapped[str | None] = mapped_column(String(100))
+    state: Mapped[str | None] = mapped_column(String(2))
+    zip_code: Mapped[str | None] = mapped_column(String(10))
     insurance_provider: Mapped[str | None] = mapped_column(String(200))
     insurance_member_id: Mapped[str | None] = mapped_column(String(100))
-    preferred_language: Mapped[str] = mapped_column(String(100), nullable=False, server_default="English")
+    preferred_language: Mapped[str | None] = mapped_column(String(100), server_default="English")
     emergency_contact_name: Mapped[str | None] = mapped_column(String(100))
     emergency_contact_phone: Mapped[str | None] = mapped_column(String(10))
+    
+    # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

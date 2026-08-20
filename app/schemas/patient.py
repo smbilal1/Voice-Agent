@@ -27,20 +27,23 @@ def normalize_phone(value: str) -> str:
 class PatientCreate(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
+    # Required fields (Phase 1: minimal voice collection)
     first_name: str = Field(min_length=1, max_length=50)
     last_name: str = Field(min_length=1, max_length=50)
     date_of_birth: date
     sex: Sex
     phone_number: str
+    
+    # Optional fields (can be collected later)
     email: str | None = Field(default=None, max_length=254)
-    address_line_1: str = Field(min_length=1, max_length=200)
+    address_line_1: str | None = Field(default=None, min_length=1, max_length=200)
     address_line_2: str | None = Field(default=None, max_length=200)
-    city: str = Field(min_length=1, max_length=100)
-    state: str
-    zip_code: str
+    city: str | None = Field(default=None, min_length=1, max_length=100)
+    state: str | None = None
+    zip_code: str | None = None
     insurance_provider: str | None = Field(default=None, max_length=200)
     insurance_member_id: str | None = Field(default=None, max_length=100)
-    preferred_language: str = Field(default="English", min_length=1, max_length=100)
+    preferred_language: str | None = Field(default="English", min_length=1, max_length=100)
     emergency_contact_name: str | None = Field(default=None, max_length=100)
     emergency_contact_phone: str | None = None
 
@@ -113,25 +116,16 @@ class PatientUpdate(PatientCreate):
     date_of_birth: date | None = None
     sex: Sex | None = None
     phone_number: str | None = None
-    address_line_1: str | None = Field(default=None, min_length=1, max_length=200)
-    city: str | None = Field(default=None, min_length=1, max_length=100)
-    state: str | None = None
-    zip_code: str | None = None
-    preferred_language: str | None = Field(default=None, min_length=1, max_length=100)
 
     @model_validator(mode="after")
     def disallow_null_required_fields(self) -> "PatientUpdate":
+        # Only the 5 core fields cannot be explicitly set to null in updates
         required_fields = {
             "first_name",
             "last_name",
             "date_of_birth",
             "sex",
             "phone_number",
-            "address_line_1",
-            "city",
-            "state",
-            "zip_code",
-            "preferred_language",
         }
         for field_name in self.model_fields_set & required_fields:
             if getattr(self, field_name) is None:
@@ -149,14 +143,14 @@ class PatientRead(BaseModel):
     sex: Sex
     phone_number: str
     email: str | None
-    address_line_1: str
+    address_line_1: str | None
     address_line_2: str | None
-    city: str
-    state: str
-    zip_code: str
+    city: str | None
+    state: str | None
+    zip_code: str | None
     insurance_provider: str | None
     insurance_member_id: str | None
-    preferred_language: str
+    preferred_language: str | None
     emergency_contact_name: str | None
     emergency_contact_phone: str | None
     created_at: datetime

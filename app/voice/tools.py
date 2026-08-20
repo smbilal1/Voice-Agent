@@ -4,17 +4,6 @@ PATIENT_PROPERTIES = {
     "date_of_birth": {"type": "string", "description": "Date of birth in YYYY-MM-DD format."},
     "sex": {"type": "string", "enum": ["Male", "Female", "Other", "Decline to Answer"]},
     "phone_number": {"type": "string", "description": "U.S. phone number; formatting is allowed."},
-    "email": {"type": "string"},
-    "address_line_1": {"type": "string"},
-    "address_line_2": {"type": "string"},
-    "city": {"type": "string"},
-    "state": {"type": "string", "description": "Two-letter U.S. state abbreviation."},
-    "zip_code": {"type": "string", "description": "Five-digit ZIP or ZIP+4."},
-    "insurance_provider": {"type": "string"},
-    "insurance_member_id": {"type": "string"},
-    "preferred_language": {"type": "string"},
-    "emergency_contact_name": {"type": "string"},
-    "emergency_contact_phone": {"type": "string"},
 }
 
 CREATE_PATIENT_TOOL = {
@@ -23,9 +12,7 @@ CREATE_PATIENT_TOOL = {
     "parameters": {
         "type": "object",
         "properties": PATIENT_PROPERTIES,
-        "required": [
-            "first_name", "last_name", "date_of_birth", "sex", "phone_number", "address_line_1", "city", "state", "zip_code"
-        ],
+        "required": ["first_name", "last_name", "date_of_birth", "sex", "phone_number"],
     },
 }
 
