@@ -2,7 +2,21 @@ import json
 
 
 def vapi_payload(name: str, arguments: dict, call_id: str = "tool-call-1") -> dict:
-    return {"message": {"type": "tool-calls", "toolCallList": [{"id": call_id, "name": name, "arguments": arguments}]}}
+    """Create Vapi payload matching actual Vapi toolCallList structure with function.arguments"""
+    return {
+        "message": {
+            "type": "tool-calls",
+            "toolCallList": [
+                {
+                    "id": call_id,
+                    "function": {
+                        "name": name,
+                        "arguments": arguments if isinstance(arguments, str) else json.dumps(arguments)
+                    }
+                }
+            ]
+        }
+    }
 
 
 def auth_headers() -> dict[str, str]:

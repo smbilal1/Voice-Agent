@@ -54,7 +54,13 @@ def extract_tool_calls(payload: dict[str, Any]) -> list[dict[str, Any]]:
 def tool_name_and_arguments(tool_call: dict[str, Any]) -> tuple[str | None, dict[str, Any]]:
     function = tool_call.get("function", {})
     name = tool_call.get("name") or function.get("name")
-    arguments = tool_call.get("arguments") or tool_call.get("parameters") or function.get("parameters") or {}
+    arguments = (
+        tool_call.get("arguments")
+        or tool_call.get("parameters")
+        or function.get("arguments")  # FIX: Vapi puts arguments here in toolCallList format
+        or function.get("parameters")
+        or {}
+    )
     if isinstance(arguments, str):
         arguments = json.loads(arguments)
     return name, arguments if isinstance(arguments, dict) else {}
