@@ -107,3 +107,14 @@ The supplied `Dockerfile` and `railway.toml` are ready for Railway deployment. O
 5. Open the generated public domain and verify `https://YOUR-DOMAIN/health` and `https://YOUR-DOMAIN/docs`.
 
 Never add `.env` or credentials to the repository.
+
+### Vercel deployment
+
+Vercel detects the FastAPI instance in `app/main.py` through `pyproject.toml`; it does **not** use the Dockerfile or run Alembic automatically.
+
+1. Set `DATABASE_URL` locally and run `alembic upgrade head` once to create/update the Neon schema.
+2. Push the repository to GitHub, then import it through Vercel's **Add New → Project** flow. Leave the framework preset on **Other** and do not set a build command or output directory.
+3. In Vercel **Settings → Environment Variables**, add `DATABASE_URL`, `ENVIRONMENT=production`, `LOG_LEVEL=INFO`, `VAPI_WEBHOOK_SECRET`, `VAPI_API_KEY` (if used), and `ALLOWED_ORIGINS=https://YOUR-PROJECT.vercel.app`.
+4. Deploy and verify `/health`, `/docs`, and `/` on the generated Vercel domain.
+
+For the Vapi tool webhook, use `https://YOUR-PROJECT.vercel.app/vapi/tools`.

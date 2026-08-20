@@ -18,6 +18,11 @@ branch_labels: Sequence[str] | None = None
 depends_on: Sequence[str] | None = None
 
 sex_enum = sa.Enum("Male", "Female", "Other", "Decline to Answer", name="sex_enum")
+# The type is created explicitly in `upgrade`; the table column must not attempt
+# to create it again (which causes DuplicateObject on PostgreSQL).
+sex_enum_column = postgresql.ENUM(
+    "Male", "Female", "Other", "Decline to Answer", name="sex_enum", create_type=False
+)
 
 
 def upgrade() -> None:
@@ -28,7 +33,7 @@ def upgrade() -> None:
         sa.Column("first_name", sa.String(length=50), nullable=False),
         sa.Column("last_name", sa.String(length=50), nullable=False),
         sa.Column("date_of_birth", sa.Date(), nullable=False),
-        sa.Column("sex", sex_enum, nullable=False),
+        sa.Column("sex", sex_enum_column, nullable=False),
         sa.Column("phone_number", sa.String(length=10), nullable=False),
         sa.Column("email", sa.String(length=254)),
         sa.Column("address_line_1", sa.String(length=200), nullable=False),

@@ -36,7 +36,9 @@ def test_vapi_lookup_and_validation_errors_follow_tool_contract(client, valid_pa
     invalid = client.post("/vapi/tools", headers=auth_headers(), json=vapi_payload("create_patient", {"first_name": "Jane"}, "invalid-1"))
     assert invalid.status_code == 200
     assert invalid.json()["results"][0]["toolCallId"] == "invalid-1"
-    assert "error" in invalid.json()["results"][0]
+    result = json.loads(invalid.json()["results"][0]["result"])
+    assert result["status"] == "validation_error"
+    assert "last_name" in result["fields"]
 
 
 def test_vapi_webhook_rejects_requests_without_the_shared_secret(client, valid_patient_payload):

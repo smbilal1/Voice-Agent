@@ -24,6 +24,25 @@ def compact_result(value: dict[str, Any]) -> str:
     return json.dumps(value, separators=(",", ":"), default=str)
 
 
+def validation_result(error: ValidationError | ValueError | TypeError | json.JSONDecodeError) -> dict[str, Any]:
+    """Give the voice model a short actionable correction, not raw validation text."""
+    if isinstance(error, ValidationError):
+        fields: list[str] = []
+        for item in error.errors():
+            location = item.get("loc", [])
+            if location:
+                fields.append(".".join(str(part) for part in location))
+        return {
+            "status": "validation_error",
+            "message": "The patient record was not saved. Ask only for the missing or invalid field, correct it, then read back the complete record and request confirmation again.",
+            "fields": fields,
+        }
+    return {
+        "status": "validation_error",
+        "message": "The patient record was not saved. Ask the caller to clarify the invalid field, then confirm the complete record again.",
+    }
+
+
 def extract_tool_calls(payload: dict[str, Any]) -> list[dict[str, Any]]:
     message = payload.get("message", {})
     calls = message.get("toolCallList", [])
@@ -95,7 +114,7 @@ def vapi_tool_webhook(
             results.append({"toolCallId": tool_call_id, "result": compact_result(result)})
         except (ValidationError, ValueError, TypeError, json.JSONDecodeError) as error:
             logger.warning("vapi_tool_error tool=%s error=%s", name, error)
-            results.append({"toolCallId": tool_call_id, "error": str(error).replace("\n", " ")})
+            results.append({"toolCallId": tool_call_id, "result": compact_result(validation_result(error))})
         except SQLAlchemyError:
             session.rollback()
             logger.exception("vapi_tool_database_error tool=%s", name)
