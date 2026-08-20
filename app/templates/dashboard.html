@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Patient Dashboard{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">Voice AI Patient Registration</p>
+    <h1>Patient dashboard</h1>
+    <p class="intro">Review registrations collected by the voice agent in one place.</p>
+  </div>
+  <div class="metric" aria-label="Active patient count">
+    <span>{{ patient_count }}</span>
+    <small>active patient{{ '' if patient_count == 1 else 's' }}</small>
+  </div>
+</section>
+
+<section class="filter-panel" aria-label="Filter patients">
+  <form method="get" class="filters">
+    <label>Last name<input type="search" name="last_name" value="{{ filters.last_name }}" placeholder="e.g. Davis"></label>
+    <label>Date of birth<input type="date" name="date_of_birth" value="{{ filters.date_of_birth }}"></label>
+    <label>Phone number<input type="tel" name="phone_number" value="{{ filters.phone_number }}" placeholder="(555) 555-5555"></label>
+    <div class="filter-actions">
+      <button type="submit">Search patients</button>
+      <a href="/">Clear</a>
+    </div>
+  </form>
+  {% if phone_error %}<p class="form-error">{{ phone_error }}</p>{% endif %}
+</section>
+
+<section class="patient-panel">
+  <div class="panel-heading"><h2>Registrations</h2><span>Active records only</span></div>
+  {% if patients %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Patient</th><th>Date of birth</th><th>Phone</th><th>Location</th><th>Registered</th><th><span class="sr-only">View</span></th></tr></thead>
+      <tbody>
+        {% for patient in patients %}
+        <tr>
+          <td><strong>{{ patient.first_name }} {{ patient.last_name }}</strong><span>{{ patient.sex.value }}</span></td>
+          <td>{{ patient.date_of_birth.strftime('%b %d, %Y') if patient.date_of_birth else '—' }}</td>
+          <td>{{ patient.phone_number[:3] }}-{{ patient.phone_number[3:6] }}-{{ patient.phone_number[6:] }}</td>
+          <td>{{ patient.city }}, {{ patient.state }}</td>
+          <td>{{ patient.created_at.strftime('%b %d, %Y') }}</td>
+          <td><a class="detail-link" href="/dashboard/patients/{{ patient.patient_id }}">View<span aria-hidden="true"> →</span></a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><div class="empty-icon">+</div><h3>No patients found</h3><p>New voice registrations will appear here after the caller confirms their information.</p></div>
+  {% endif %}
+</section>
+{% endblock %}

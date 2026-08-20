@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Patient Details{% endblock %}
+{% block content %}
+{% if patient %}
+<a class="back-link" href="/">← Back to patients</a>
+<section class="detail-hero">
+  <p class="eyebrow">Patient registration</p>
+  <h1>{{ patient.first_name }} {{ patient.last_name }}</h1>
+  <p>Registered {{ patient.created_at.strftime('%B %d, %Y at %I:%M %p UTC') }}</p>
+</section>
+<section class="detail-grid">
+  <article><h2>Demographics</h2><dl><dt>Date of birth</dt><dd>{{ patient.date_of_birth.strftime('%B %d, %Y') }}</dd><dt>Sex</dt><dd>{{ patient.sex.value }}</dd><dt>Preferred language</dt><dd>{{ patient.preferred_language }}</dd></dl></article>
+  <article><h2>Contact</h2><dl><dt>Phone</dt><dd>{{ patient.phone_number[:3] }}-{{ patient.phone_number[3:6] }}-{{ patient.phone_number[6:] }}</dd><dt>Email</dt><dd>{{ patient.email or 'Not provided' }}</dd><dt>Address</dt><dd>{{ patient.address_line_1 }}{% if patient.address_line_2 %}<br>{{ patient.address_line_2 }}{% endif %}<br>{{ patient.city }}, {{ patient.state }} {{ patient.zip_code }}</dd></dl></article>
+  <article><h2>Insurance</h2><dl><dt>Provider</dt><dd>{{ patient.insurance_provider or 'Not provided' }}</dd><dt>Member ID</dt><dd>{{ patient.insurance_member_id or 'Not provided' }}</dd></dl></article>
+  <article><h2>Emergency contact</h2><dl><dt>Name</dt><dd>{{ patient.emergency_contact_name or 'Not provided' }}</dd><dt>Phone</dt><dd>{% if patient.emergency_contact_phone %}{{ patient.emergency_contact_phone[:3] }}-{{ patient.emergency_contact_phone[3:6] }}-{{ patient.emergency_contact_phone[6:] }}{% else %}Not provided{% endif %}</dd></dl></article>
+</section>
+{% else %}
+<section class="not-found"><p class="eyebrow">404</p><h1>Patient not found</h1><p>This record may have been deleted or the link is incorrect.</p><a class="button-link" href="/">Return to dashboard</a></section>
+{% endif %}
+{% endblock %}
